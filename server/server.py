@@ -28,7 +28,7 @@ SD = {
 # tkinter
 fenettre = tk.Tk()
 fenettre.title("sefaga server")
-fenettre.geometry("600x400")
+fenettre.geometry("1000x600")
 
 # socket server functions
 
@@ -105,10 +105,10 @@ def start_server() -> None:
 
 # tkinter functions
 
-tk_srv_msg = tk.Label(fenettre)
-tk_usr_msg = tk.Label(fenettre)
-tk_usr_oln = tk.Label(fenettre)
-tk_srv_ifo = tk.Label(fenettre)
+tk_srv_msg = tk.Text(fenettre, bd=0)
+tk_usr_msg = tk.Text(fenettre, bd=0)
+tk_usr_oln = tk.Label(fenettre, anchor="n")
+tk_srv_ifo = tk.Text(fenettre, bd=0)
 tk_srv_inp = tk.Entry(fenettre, bd=0)
 tk_drk_mod = tk.Button(fenettre, text="artemis", bd = 0, command = lambda: change_theme())
 
@@ -131,21 +131,41 @@ def update_tk(old: tuple) -> None:
     fx = fenettre.winfo_width()
     fy = fenettre.winfo_height()
 
-
     if (fx, fy) != old:
         print(fx, fy)
-        tk_srv_msg.place(x=5, y=5, width=fx//3-10, height=fy-50)
-        tk_usr_msg.place(x=fx//3, y=5, width=fx//3-5, height=fy-50)
-        tk_usr_oln.place(x=fx//3*2, y=5, width=fx//3-5, height=fy//2-10)
-        tk_srv_ifo.place(x=fx//3*2, y=fy//2, width=fx//3-5, height=fy//2-75)
+        tk_srv_msg.place(x=5, y=5, width=fx//5*2-10, height=fy-50)
+        tk_usr_msg.place(x=fx//5*2, y=5, width=fx//5*2-5, height=fy-50)
+        tk_usr_oln.place(x=fx//5*4, y=5, width=fx//5-5, height=fy//2-10)
+        tk_srv_ifo.place(x=fx//5*4, y=fy//2, width=fx//5-5, height=fy//2-75)
+        tk_drk_mod.place(x=fx//5*4, y=fy-70, width=fx//5-5, height=25)
         tk_srv_inp.place(x=5, y=fy-40, width=fx-10, height=30)
-        tk_drk_mod.place(x=fx//3*2, y=fy-70, width=fx//3-5, height=25)
     
     fenettre.after(100, lambda: update_tk((fx, fy)))
 
+def refresh_labels() -> None:
+    sm = "\n".join(SD["srv_messages"])
+    um = "\n".join(SD["user_messages"])
+    ou = "".join(f"{u['addr']}\n[op{u['plvl']}] {u['name']}\n\n" if u["loged"] else f"{u['addr']}\n\n" for u in SD["online_users"].values())
+
+    tk_srv_msg.config(state="normal")
+    tk_srv_msg.delete("1.0", "end")
+    tk_srv_msg.insert("end", sm)
+    tk_srv_msg.config(state="disabled")
+
+    tk_usr_msg.config(state="normal")
+    tk_usr_msg.delete("1.0", "end")
+    tk_usr_msg.insert("end", um)
+    tk_usr_msg.config(state="disabled")
+
+    tk_usr_oln.config(text=ou)
+
+
+    fenettre.after(100, lambda: refresh_labels())
+
 change_theme()
 update_tk((1, 1))
+refresh_labels()
 
-# start_new_thread(start_server, ())
+start_new_thread(start_server, ())
 
 fenettre.mainloop()
