@@ -26,7 +26,7 @@ def login_user(conn: socket.socket, addr: tuple):
     print(f"{addr[0]} token: {dd}")         # dev only, not safe
     
     if user := st.check_user(dd, users):
-        print(f"{addr[0]} user: {user['name']}")
+        print(f"{addr[0]} user name: {user['name']}")
     else:
         print(f"{addr[0]} token invalide")
 
