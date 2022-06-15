@@ -18,7 +18,7 @@ users = json.load(open(f"{st.path}/users.json"))
 online_users = []
 
 def login_user(conn: socket.socket, addr: tuple) -> None:
-    print(f"{addr[0]}:{addr[1]} send login request")
+    print(f"{addr[0]}:{addr[1]} connected to socket")
 
     data = conn.recv(1024)
     if not data: return conn.close()
@@ -27,6 +27,10 @@ def login_user(conn: socket.socket, addr: tuple) -> None:
     print(f"{addr[0]}:{addr[1]} token: {dd}")         # dev only, not safe
     
     if user := st.check_user(dd, users):
+        if user["name"] in [u["name"] for u in online_users]:
+            print(f"{user['name']} is already online")
+            conn.send(f"{st.encrypt_string('server: user already online', srv_key)}<end>".encode())
+            return conn.close()
         print(f"{addr[0]}:{addr[1]} user name: {user['name']}")
         user["ip"], user["port"], user["conn"] = addr[0], addr[1], conn
         user_com(user)
