@@ -17,5 +17,8 @@ def generate_keys(name):
     with open(f"{path}/keys/{name}_public.pem", "wb") as f:
         f.write(public_key.save_pkcs1())
 
+try: os.mkdir(f"{path}/keys")
+except FileExistsError: pass
+
 generate_keys("psw")
 generate_keys("token")
