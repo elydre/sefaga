@@ -11,7 +11,6 @@ PORT = 57321            # server port
 psw_key = st.get_private_key(f"{st.path}/keys/psw_private.pem")
 users = json.load(open(f"{st.path}/users.json"))
 
-print(st.crypt_token("V1V7ovvUaCQSLVp92LM9"))
 
 def login_user(conn: socket.socket, addr: tuple):
     print(f"{addr[0]} c'est connecte!")
@@ -24,10 +23,10 @@ def login_user(conn: socket.socket, addr: tuple):
         return
     
     dd = st.decrypt_data(data, psw_key)[0]
-    print(f"{addr[0]} token: {dd}")
+    print(f"{addr[0]} token: {dd}")         # dev only, not safe
     
     if user := st.check_user(dd, users):
-        print(f"{addr[0]} user: {user}")
+        print(f"{addr[0]} user: {user['name']}")
     else:
         print(f"{addr[0]} token invalide")
 

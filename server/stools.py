@@ -21,9 +21,7 @@ def get_public_key(path: str) -> rsa.PublicKey:
 
 
 def check_user(token: str, users: list):
-    ctoken = crypt_token(token)
-    print(ctoken)
-    return next((user for user in users if user["ctoken"] == ctoken), None)
+    return next((user for user in users if user["ctoken"] == crypt_token(token)), None)
 
 
 def decrypt_data(data: bytes, psw_key: rsa.PrivateKey) -> str:

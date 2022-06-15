@@ -21,4 +21,3 @@ try: os.mkdir(f"{path}/keys")
 except FileExistsError: pass
 
 generate_keys("psw")
-generate_keys("token")
