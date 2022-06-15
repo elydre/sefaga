@@ -6,8 +6,9 @@ import os
 path = os.path.dirname(os.path.abspath(__file__))
 
 def generate_keys(name):
-    print(f"Generating keys for {name}")
+    print(f"Generating keys for {name}...")
     public_key, private_key = rsa.newkeys(2048)
+    print(f"Saving keys for {name}...")
 
     # Save the private key to a file
     with open(f"{path}/keys/{name}_private.pem", "wb") as f:
@@ -21,3 +22,5 @@ try: os.mkdir(f"{path}/keys")
 except FileExistsError: pass
 
 generate_keys("psw")
+generate_keys("clt")
+generate_keys("srv")

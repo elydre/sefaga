@@ -9,29 +9,47 @@ HOST = "localhost"      # server ip
 PORT = 57321            # server port
 
 psw_key = st.get_private_key(f"{st.path}/keys/psw_private.pem")
+clt_key = st.get_private_key(f"{st.path}/keys/clt_private.pem")
+srv_key = st.get_public_key(f"{st.path}/keys/srv_public.pem")
+
+
 users = json.load(open(f"{st.path}/users.json"))
 
+online_users = []
 
-def login_user(conn: socket.socket, addr: tuple):
-    print(f"{addr[0]} c'est connecte!")
-    try:
-        data = conn.recv(1024)
-        if not data: return
-    except Exception as e:
-        print(e)
-        conn.close()
-        return
+def login_user(conn: socket.socket, addr: tuple) -> None:
+    print(f"{addr[0]}:{addr[1]} send login request")
+
+    data = conn.recv(1024)
+    if not data: return conn.close()
     
     dd = st.decrypt_data(data, psw_key)[0]
-    print(f"{addr[0]} token: {dd}")         # dev only, not safe
+    print(f"{addr[0]}:{addr[1]} token: {dd}")         # dev only, not safe
     
     if user := st.check_user(dd, users):
-        print(f"{addr[0]} user name: {user['name']}")
+        print(f"{addr[0]}:{addr[1]} user name: {user['name']}")
+        user["ip"], user["port"], user["conn"] = addr[0], addr[1], conn
+        user_com(user)
+        print(f"{addr[0]}:{addr[1]} logout")
     else:
-        print(f"{addr[0]} token invalide")
+        print(f"{addr[0]}:{addr[1]} invalid token")
+        return conn.close()
 
-    conn.close()
-    print(f"{addr[0]} c'est déconnecte")
+
+def user_com(user: dict) -> None:
+    online_users.append(user)
+    conn = user["conn"]
+    while True:
+        try:
+            data = conn.recv(1024)
+            if not data: break
+            dd = st.decrypt_data(data, clt_key)[0]
+            print(f"{user['name']} send: {dd}")
+            for u in online_users:
+                if u["name"] != user["name"]:
+                    u["conn"].send(f"{st.encrypt_string(dd, srv_key)}<end>".encode())
+        except ConnectionResetError:
+            break
 
 
 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:

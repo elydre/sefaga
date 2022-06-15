@@ -5,10 +5,7 @@ import rsa
 
 path = os.path.dirname(os.path.abspath(__file__))
 
-
-def crypt_token(token: str) -> str:
-    return hashlib.sha256(token.encode()).hexdigest()
-
+# shared functions
 
 def get_private_key(path: str) -> rsa.PrivateKey:
     with open(path, "rb") as f:
@@ -20,9 +17,12 @@ def get_public_key(path: str) -> rsa.PublicKey:
         return rsa.PublicKey.load_pkcs1(f.read())
 
 
-def check_user(token: str, users: list):
-    return next((user for user in users if user["ctoken"] == crypt_token(token)), None)
+def decrypt_message(message: bytes, private_key: rsa.PrivateKey) -> str:
+    return rsa.decrypt(message, private_key).decode()
 
+
+def encrypt_string(message: str, public_key: rsa.PublicKey) -> bytes:
+    return rsa.encrypt(message.encode(), public_key)
 
 def decrypt_data(data: bytes, psw_key: rsa.PrivateKey) -> str:
     sortie = []
@@ -33,5 +33,11 @@ def decrypt_data(data: bytes, psw_key: rsa.PrivateKey) -> str:
     return sortie
 
 
-def decrypt_message(message: bytes, private_key: rsa.PrivateKey) -> str:
-    return rsa.decrypt(message, private_key).decode()
+# stool functions
+
+def crypt_token(token: str) -> str:
+    return hashlib.sha256(token.encode()).hexdigest()
+
+
+def check_user(token: str, users: list):
+    return next((user for user in users if user["ctoken"] == crypt_token(token)), None)
