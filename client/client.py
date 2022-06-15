@@ -17,5 +17,5 @@ def on_message(data):
     print(ct.decrypt_data(data, srv_key))
 
 while True:
-    msg = input("message: ")
+    msg = input("")
     client.send(ct.encrypt_string(msg, clt_key))

@@ -44,10 +44,11 @@ def user_com(user: dict) -> None:
             data = conn.recv(1024)
             if not data: break
             dd = st.decrypt_data(data, clt_key)[0]
-            print(f"{user['name']} send: {dd}")
+            msg = f"{user['name']}: {dd}"
+            print(msg)
             for u in online_users:
                 if u["name"] != user["name"]:
-                    u["conn"].send(f"{st.encrypt_string(dd, srv_key)}<end>".encode())
+                    u["conn"].send(f"{st.encrypt_string(msg, srv_key)}<end>".encode())
         except ConnectionResetError:
             break
 
