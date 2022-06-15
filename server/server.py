@@ -127,6 +127,7 @@ def change_theme() -> None:
         tk_srv_inp.config(insertbackground="#000000")
         tk_drk_mod.config(text="artemis")
 
+
 def update_tk(old: tuple) -> None:
     fx = fenettre.winfo_width()
     fy = fenettre.winfo_height()
@@ -143,8 +144,11 @@ def update_tk(old: tuple) -> None:
     fenettre.after(100, lambda: update_tk((fx, fy)))
 
 def refresh_labels() -> None:
-    sm = "\n".join(SD["srv_messages"])
-    um = "\n".join(SD["user_messages"])
+
+    max_line = (fenettre.winfo_height() - 50) // 19
+
+    sm = "\n".join(SD["srv_messages"][-max_line:])
+    um = "\n".join(SD["user_messages"][-max_line:])
     ou = "".join(f"{u['addr']}\n[op{u['plvl']}] {u['name']}\n\n" if u["loged"] else f"{u['addr']}\n\n" for u in SD["online_users"].values())
 
     tk_srv_msg.config(state="normal")
