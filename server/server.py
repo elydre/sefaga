@@ -1,6 +1,7 @@
 import json
 import socket
 from _thread import start_new_thread
+from unicodedata import name
 
 import stools as st
 
@@ -57,7 +58,7 @@ def login_user(conn: socket.socket, addr: tuple) -> None:
         SD["online_users"][conn]["loged"] = True
 
         user_com(conn)
-        print(f"{str_addr} logout")
+        print(f"{user['name']} quited")
     else:
         print(f"{str_addr} invalid token")
         
@@ -73,8 +74,8 @@ def user_com(conn: socket.socket) -> None:
             dd = st.decrypt_data(data, clt_key)[0]
             msg = f"{user_name}: {dd}"
             print(msg)
-            for u in SD["loged_users"]:
-                if u["name"] != user_name:
+            for u in SD["online_users"].values():
+                if u["loged"] and u["name"] != user_name:
                     u["conn"].send(f"{st.encrypt_string(msg, srv_key)}<end>".encode())
         except ConnectionResetError:
             break
