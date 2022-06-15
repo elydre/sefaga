@@ -28,8 +28,7 @@ SD = {
 # tkinter
 fenettre = tk.Tk()
 fenettre.title("sefaga server")
-
-
+fenettre.geometry("600x400")
 
 # socket server functions
 
@@ -37,7 +36,6 @@ def stop_user(conn: socket.socket) -> None:
     SD["srv_messages"].append(f"{SD['online_users'][conn]['addr']} disconnected from socket")
     del SD["online_users"][conn]
     conn.close()
-
 
 def login_user(conn: socket.socket, addr: tuple) -> None:
     str_addr = f"{addr[0]}:{addr[1]}"
@@ -79,7 +77,6 @@ def login_user(conn: socket.socket, addr: tuple) -> None:
         SD["srv_messages"].append(f"{str_addr} invalid token")
         
     return stop_user(conn)
-
 
 def user_com(conn: socket.socket) -> None:
     user_name = SD["online_users"][conn]["name"]
