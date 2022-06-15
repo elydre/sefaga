@@ -1,44 +1,27 @@
+import hashlib
 import os
 
 import rsa
 
-cars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 path = os.path.dirname(os.path.abspath(__file__))
 
 
-def int_to_base62(i: int) -> str:
-    if i == 0: return "0"
-    s = ""
-    while i > 0:
-        s = cars[i % 62] + s
-        i //= 62
-    return s
-
-
-def crypt_token(token: str, token_key: rsa.PublicKey) -> str:
-    crypted_tocken = "".join([str(e) for e in rsa.encrypt(token.encode(), token_key)])
-    print(crypted_tocken)
-    s = ""
-    nxt = 0
-    for i in range(len(crypted_tocken)):
-        if nxt == i:
-            s += crypted_tocken[i]
-            nxt += int(crypted_tocken[i]) + 1
-
-    return int_to_base62(int(s))
+def crypt_token(token: str) -> str:
+    return hashlib.sha256(token.encode()).hexdigest()
 
 
 def get_private_key(path: str) -> rsa.PrivateKey:
     with open(path, "rb") as f:
         return rsa.PrivateKey.load_pkcs1(f.read())
 
+
 def get_public_key(path: str) -> rsa.PublicKey:
     with open(path, "rb") as f:
         return rsa.PublicKey.load_pkcs1(f.read())
 
 
-def check_user(token: str, users: list, token_key: rsa.PublicKey):
-    ctoken = crypt_token(token, token_key)
+def check_user(token: str, users: list):
+    ctoken = crypt_token(token)
     print(ctoken)
     return next((user for user in users if user["ctoken"] == ctoken), None)
 
