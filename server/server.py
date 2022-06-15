@@ -103,3 +103,49 @@ def start_server() -> None:
             conn, addr = s.accept()
             start_new_thread(login_user, (conn, addr))
 
+# tkinter functions
+
+tk_srv_msg = tk.Label(fenettre)
+tk_usr_msg = tk.Label(fenettre)
+tk_usr_oln = tk.Label(fenettre)
+tk_srv_ifo = tk.Label(fenettre)
+tk_srv_inp = tk.Entry(fenettre, bd=0)
+tk_drk_mod = tk.Button(fenettre, text="artemis", bd = 0, command = lambda: change_theme())
+
+def set_theme(text: str, window: str, label: str) -> None:
+    for e in [tk_srv_msg, tk_usr_msg, tk_usr_oln, tk_srv_ifo, tk_srv_inp, tk_drk_mod]:
+        e.config(bg=label, fg=text, font=("Arial", 13))
+    fenettre.config(bg=window)
+
+def change_theme() -> None:
+    if tk_drk_mod.cget("text") == "artemis":
+        set_theme("#ffffff", "#1e1e1e", "#333333")
+        tk_srv_inp.config(insertbackground="#ffffff")
+        tk_drk_mod.config(text="salaud")
+    else:
+        set_theme("#000000", "#f0f0f0", "#ffffff")
+        tk_srv_inp.config(insertbackground="#000000")
+        tk_drk_mod.config(text="artemis")
+
+def update_tk(old: tuple) -> None:
+    fx = fenettre.winfo_width()
+    fy = fenettre.winfo_height()
+
+
+    if (fx, fy) != old:
+        print(fx, fy)
+        tk_srv_msg.place(x=5, y=5, width=fx//3-10, height=fy-50)
+        tk_usr_msg.place(x=fx//3, y=5, width=fx//3-5, height=fy-50)
+        tk_usr_oln.place(x=fx//3*2, y=5, width=fx//3-5, height=fy//2-10)
+        tk_srv_ifo.place(x=fx//3*2, y=fy//2, width=fx//3-5, height=fy//2-75)
+        tk_srv_inp.place(x=5, y=fy-40, width=fx-10, height=30)
+        tk_drk_mod.place(x=fx//3*2, y=fy-70, width=fx//3-5, height=25)
+    
+    fenettre.after(100, lambda: update_tk((fx, fy)))
+
+change_theme()
+update_tk((1, 1))
+
+# start_new_thread(start_server, ())
+
+fenettre.mainloop()
