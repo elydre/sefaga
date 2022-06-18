@@ -32,8 +32,9 @@ fenettre.geometry("1000x600")
 
 # socket server functions
 
-def stop_user(conn: socket.socket) -> None:
-    SD["srv_messages"].append(f"{SD['online_users'][conn]['addr']} disconnected from socket")
+def stop_user(conn: socket.socket, reason: str) -> None:
+
+    SD["srv_messages"].append(f"{SD['online_users'][conn]['addr']}: {reason}\n{SD['online_users'][conn]['addr']} disconnected from socket")
     del SD["online_users"][conn]
     conn.close()
 
@@ -52,18 +53,18 @@ def login_user(conn: socket.socket, addr: tuple) -> None:
 
     try:
         data = conn.recv(1024)
-        if not data: return conn.close()
+        if not data: return stop_user(conn, "no data")
     except ConnectionResetError:
-        return stop_user(conn)
+        return stop_user(conn, "connection reset")
     
     dd = st.decrypt_data(data, psw_key)[0]
+    if not dd: return stop_user(conn, "decryption error")
     SD["srv_messages"].append(f"{str_addr} token: {dd}")        # dev only, not safe
     
     if user := st.check_user(dd, users):
         if user["name"] in [u["name"] for u in SD["online_users"].values()]:
-            SD["srv_messages"].append(f"{user['name']} is already loged")
             conn.send(f"{st.encrypt_string('server: user already loged', srv_key)}<end>".encode())
-            return stop_user(conn)
+            return stop_user(conn, f"{user['name']} user already loged")
         
         SD["srv_messages"].append(f"{str_addr} user name: {user['name']}")
         
@@ -76,7 +77,7 @@ def login_user(conn: socket.socket, addr: tuple) -> None:
     else:
         SD["srv_messages"].append(f"{str_addr} invalid token")
         
-    return stop_user(conn)
+    return stop_user(conn, "connection closed")
 
 def user_com(conn: socket.socket) -> None:
     user_name = SD["online_users"][conn]["name"]
@@ -85,6 +86,7 @@ def user_com(conn: socket.socket) -> None:
             data = conn.recv(1024)
             if not data: break
             dd = st.decrypt_data(data, clt_key)[0]
+            if not dd: break
             msg = f"{user_name}: {dd}"
             SD["user_messages"].append(msg)
             for u in SD["online_users"].values():
@@ -108,7 +110,7 @@ def start_server() -> None:
 tk_srv_msg = tk.Text(fenettre, bd=0)
 tk_usr_msg = tk.Text(fenettre, bd=0)
 tk_usr_oln = tk.Label(fenettre, anchor="n")
-tk_srv_ifo = tk.Text(fenettre, bd=0)
+tk_srv_ifo = tk.Label(fenettre, anchor="n")
 tk_srv_inp = tk.Entry(fenettre, bd=0)
 tk_drk_mod = tk.Button(fenettre, text="artemis", bd = 0, command = lambda: change_theme())
 
@@ -149,7 +151,8 @@ def refresh_labels() -> None:
 
     sm = "\n".join(SD["srv_messages"][-max_line:])
     um = "\n".join(SD["user_messages"][-max_line:])
-    ou = "".join(f"{u['addr']}\n[op{u['plvl']}] {u['name']}\n\n" if u["loged"] else f"{u['addr']}\n\n" for u in SD["online_users"].values())
+    ou = "\n\n".join(f"{u['addr']}\n[op{u['plvl']}] {u['name']}" for u in SD["online_users"].values() if u["loged"])
+    fo = "\n\n".join(f"{u['addr']}" for u in SD["online_users"].values() if not u["loged"])
 
     tk_srv_msg.config(state="normal")
     tk_srv_msg.delete("1.0", "end")
@@ -162,6 +165,7 @@ def refresh_labels() -> None:
     tk_usr_msg.config(state="disabled")
 
     tk_usr_oln.config(text=ou)
+    tk_srv_ifo.config(text=fo)
 
 
     fenettre.after(100, lambda: refresh_labels())

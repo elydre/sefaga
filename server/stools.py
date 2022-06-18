@@ -18,7 +18,10 @@ def get_public_key(path: str) -> rsa.PublicKey:
 
 
 def decrypt_message(message: bytes, private_key: rsa.PrivateKey) -> str:
-    return rsa.decrypt(message, private_key).decode()
+    try:
+        return rsa.decrypt(message, private_key).decode()
+    except rsa.DecryptionError:
+        return False
 
 
 def encrypt_string(message: str, public_key: rsa.PublicKey) -> bytes:
