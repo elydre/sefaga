@@ -107,12 +107,23 @@ def start_server() -> None:
 
 # tkinter functions
 
+def on_input(event):
+
+    msg = f"server: {tk_srv_inp.get()}"
+    SD["user_messages"].append(msg)
+
+    for u in SD["online_users"].values():
+        if u["loged"] and u["name"]:
+            u["conn"].send(f"{st.encrypt_string(msg, srv_key)}<end>".encode())
+    tk_srv_inp.delete(0, "end")
+
 tk_srv_msg = tk.Text(fenettre, bd=0)
 tk_usr_msg = tk.Text(fenettre, bd=0)
 tk_usr_oln = tk.Label(fenettre, anchor="n")
 tk_srv_ifo = tk.Label(fenettre, anchor="n")
 tk_srv_inp = tk.Entry(fenettre, bd=0)
 tk_drk_mod = tk.Button(fenettre, text="artemis", bd = 0, command = lambda: change_theme())
+tk_srv_inp.bind("<Return>", on_input)
 
 def set_theme(text: str, window: str, label: str) -> None:
     for e in [tk_srv_msg, tk_usr_msg, tk_usr_oln, tk_srv_ifo, tk_srv_inp, tk_drk_mod]:
@@ -144,6 +155,7 @@ def update_tk(old: tuple) -> None:
         tk_srv_inp.place(x=5, y=fy-40, width=fx-10, height=30)
     
     fenettre.after(100, lambda: update_tk((fx, fy)))
+
 
 def refresh_labels() -> None:
 
