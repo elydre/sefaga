@@ -167,7 +167,6 @@ def refresh_labels() -> None:
     tk_usr_oln.config(text=ou)
     tk_srv_ifo.config(text=fo)
 
-
     fenettre.after(100, lambda: refresh_labels())
 
 change_theme()
