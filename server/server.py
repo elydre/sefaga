@@ -105,7 +105,7 @@ def start_server() -> None:
             conn, addr = s.accept()
             start_new_thread(login_user, (conn, addr))
 
-# tkinter functions
+# tkinter setup & functions
 
 def on_input(event):
 
