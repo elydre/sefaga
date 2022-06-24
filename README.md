@@ -25,9 +25,11 @@ CLIENT
 ```
 
 ### token.json
+```json
 {
     "name": "token"
 }
+```
 
 ## server
 
