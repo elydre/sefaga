@@ -46,7 +46,6 @@ def login_user(conn: socket.socket, addr: tuple) -> None:
         "addr": str_addr,
         "loged": False,
         "name": None,
-        "plvl": None,
         "conn": conn
     }
 
@@ -68,7 +67,6 @@ def login_user(conn: socket.socket, addr: tuple) -> None:
         SD["srv_messages"].append(f"{str_addr} user name: {user['name']}")
         
         SD["online_users"][conn]["name"] = user["name"]
-        SD["online_users"][conn]["plvl"] = user["plvl"]
         SD["online_users"][conn]["loged"] = True
 
         user_com(conn)
