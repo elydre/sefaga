@@ -163,7 +163,7 @@ def refresh_labels() -> None:
 
     sm = "\n".join(SD["srv_messages"][::-1])
     um = "\n".join(SD["user_messages"][::-1])
-    ou = "\n\n".join(f"{u['addr']}\n[op{u['plvl']}] {u['name']}" for u in SD["online_users"].values() if u["loged"])
+    ou = "\n\n".join(f"{u['addr']}\n{u['name']}" for u in SD["online_users"].values() if u["loged"])
     fo = "\n\n".join(f"{u['addr']}" for u in SD["online_users"].values() if not u["loged"])
 
     tk_srv_msg.config(state="normal")
