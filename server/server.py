@@ -1,10 +1,9 @@
 import json
 import socket
-from _thread import start_new_thread
 import tkinter as tk
+from _thread import start_new_thread
 
 import stools as st
-
 
 # server ip and port
 HOST = "localhost"
@@ -74,6 +73,7 @@ def login_user(conn: socket.socket, addr: tuple) -> None:
 
         user_com(conn)
         SD["srv_messages"].append(f"{user['name']} quited")
+        send_all(f"{user['name']} quited")
     else:
         SD["srv_messages"].append(f"{str_addr} invalid token")
         
@@ -81,6 +81,7 @@ def login_user(conn: socket.socket, addr: tuple) -> None:
 
 def user_com(conn: socket.socket) -> None:
     user_name = SD["online_users"][conn]["name"]
+    send_all(f"server: {user_name} is online")
     while True:
         try:
             data = conn.recv(1024)
@@ -95,6 +96,13 @@ def user_com(conn: socket.socket) -> None:
         except ConnectionResetError:
             break
 
+def send_all(msg) -> None:
+    SD["user_messages"].append(msg)
+    for u in SD["online_users"].values():
+        if u["loged"] and u["name"]:
+            u["conn"].send(f"{st.encrypt_string(msg, srv_key)}<end>".encode())
+
+
 def start_server() -> None:
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         s.bind((HOST, PORT))
@@ -108,13 +116,9 @@ def start_server() -> None:
 # tkinter setup & functions
 
 def on_input(event):
-
     msg = f"server: {tk_srv_inp.get()}"
-    SD["user_messages"].append(msg)
+    send_all(msg)
 
-    for u in SD["online_users"].values():
-        if u["loged"] and u["name"]:
-            u["conn"].send(f"{st.encrypt_string(msg, srv_key)}<end>".encode())
     tk_srv_inp.delete(0, "end")
 
 tk_srv_msg = tk.Text(fenettre, bd=0)
@@ -159,10 +163,8 @@ def update_tk(old: tuple) -> None:
 
 def refresh_labels() -> None:
 
-    max_line = (fenettre.winfo_height() - 50) // 19
-
-    sm = "\n".join(SD["srv_messages"][-max_line:])
-    um = "\n".join(SD["user_messages"][-max_line:])
+    sm = "\n".join(SD["srv_messages"][::-1])
+    um = "\n".join(SD["user_messages"][::-1])
     ou = "\n\n".join(f"{u['addr']}\n[op{u['plvl']}] {u['name']}" for u in SD["online_users"].values() if u["loged"])
     fo = "\n\n".join(f"{u['addr']}" for u in SD["online_users"].values() if not u["loged"])
 
